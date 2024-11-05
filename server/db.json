@@ -1,0 +1,11 @@
+{
+  "tedTalks": [
+    { "id": 1, "title": "Inspiração Diária" },
+    { "id": 2, "title": "Ciência e Tecnologia" },
+    { "id": 3, "title": "Educação e Conhecimento" },
+    { "id": 4, "title": "Desenvolvimento Pessoal" },
+    { "id": 5, "title": "Saúde e Bem-estar" },
+    { "id": 6, "title": "Economia e Negócios" }
+  ]
+}
+
