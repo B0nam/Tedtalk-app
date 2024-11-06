@@ -3,11 +3,15 @@ import 'package:http/http.dart' as http;
 import '../models/ted_talk.dart';
 
 class TedService {
+  TedService({http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client();
+
+  final http.Client _httpClient;
   final String baseUrl = 'http://localhost:3000/tedTalks';
 
   Future<List<TedTalk>> fetchTedTalks() async {
     try {
-      final response = await http.get(Uri.parse(baseUrl));
+      final response = await _httpClient.get(Uri.parse(baseUrl));
       
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
