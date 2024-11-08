@@ -1,4 +1,8 @@
+// lib/pages/home.dart
 import 'package:flutter/material.dart';
+import 'package:tedtalk/models/ted_list.dart';
+import 'package:tedtalk/services/ted_list_service.dart';
+import 'package:tedtalk/widgets/ted_list_widget.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -6,6 +10,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final TedListService _tedListService = TedListService();
   String filtroDeBusca = '';
 
   void atualizarFiltro(String novoFiltro) {
@@ -31,13 +36,58 @@ class _HomeState extends State<Home> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const ResumoAssistido(),
-          BarraDePesquisa(
-              atualizarFiltro:
-                  atualizarFiltro), // Passa a função de atualização do filtro
+          BarraDePesquisa(atualizarFiltro: atualizarFiltro),
           Expanded(
-            child: ListaDeTeds(
-                filtroDeBusca:
-                    filtroDeBusca), // Passa o filtro de busca para a lista
+            child: FutureBuilder<List<TedList>>(
+              future: _tedListService
+                  .fetchAllTedLists(), // Carregar todas as listas de TED Talks
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                      child: CircularProgressIndicator()); // Carregando
+                } else if (snapshot.hasError) {
+                  return Center(
+                      child: Text(
+                          'Error: ${snapshot.error}')); // Exibe erro se houver
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                      child: Text(
+                          'No TED Lists available')); // Caso não haja dados
+                } else {
+                  final listas = snapshot.data!
+                      .where((lista) => lista.title.toLowerCase().contains(
+                          filtroDeBusca
+                              .toLowerCase())) // Aplica o filtro de busca
+                      .toList();
+                  return ListView.builder(
+                    itemCount: listas.length,
+                    itemBuilder: (context, index) {
+                      final lista = listas[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: ListTile(
+                          title: Text(lista.title),
+                          subtitle: Text(
+                              'Contains ${lista.tedTalks.length} TED Talks'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            // Navega para a tela de TED Talks dessa lista
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TedTalksListScreen(tedList: lista),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -91,7 +141,7 @@ class BarraDePesquisa extends StatelessWidget {
       child: TextField(
         onChanged: atualizarFiltro,
         decoration: InputDecoration(
-          hintText: 'Buscar TED Talks...',
+          hintText: 'Search TED Lists...',
           prefixIcon: const Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
@@ -103,48 +153,6 @@ class BarraDePesquisa extends StatelessWidget {
               const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
         ),
       ),
-    );
-  }
-}
-
-class ListaDeTeds extends StatefulWidget {
-  final String filtroDeBusca;
-
-  const ListaDeTeds({Key? key, required this.filtroDeBusca}) : super(key: key);
-
-  @override
-  _ListaDeTedsState createState() => _ListaDeTedsState();
-}
-
-class _ListaDeTedsState extends State<ListaDeTeds> {
-  final List<String> todasListasDeTeds = [
-    'Inspiração Diária',
-    'Ciência e Tecnologia',
-    'Educação e Conhecimento',
-    'Desenvolvimento Pessoal',
-    'Saúde e Bem-estar',
-    'Economia e Negócios',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    List<String> listasFiltradas = todasListasDeTeds
-        .where((lista) =>
-            lista.toLowerCase().contains(widget.filtroDeBusca.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: listasFiltradas.length,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: ListTile(
-            title: Text(listasFiltradas[index]),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
-          ),
-        );
-      },
     );
   }
 }
