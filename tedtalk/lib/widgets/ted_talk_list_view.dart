@@ -6,12 +6,12 @@ class TedTalkListView extends StatelessWidget {
   final Function(String) onRemove;
   final Function(TedTalk) onEdit;
 
-  const TedTalkListView(
-      {Key? key,
-      required this.tedTalksFuture,
-      required this.onRemove,
-      required this.onEdit})
-      : super(key: key);
+  const TedTalkListView({
+    Key? key,
+    required this.tedTalksFuture,
+    required this.onRemove,
+    required this.onEdit,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,14 @@ class TedTalkListView extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                   title: Text(tedTalk.name),
-                  subtitle: Text('Palestrante: ${tedTalk.speaker}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Palestrante: ${tedTalk.speaker}'),
+                      Text('Duração: ${tedTalk.duration.inMinutes} minutos'),
+                      Text('Descrição: ${tedTalk.description}'),
+                    ],
+                  ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
