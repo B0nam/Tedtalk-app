@@ -1,15 +1,3 @@
 {
-    "tedLists": [
-      {
-        "id": 1,
-        "title": "Favorite Talks",
-        "tedTalks": ["1", "2"]
-      },
-      {
-        "id": 2,
-        "title": "Watch Later",
-        "tedTalks": []
-      }
-    ]
-  }
-  
+  "tedLists": []
+}

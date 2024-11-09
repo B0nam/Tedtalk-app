@@ -1,20 +1,3 @@
 {
-  "tedTalks": [
-    {
-      "id": 1,
-      "name": "The Power of Vulnerability",
-      "image": "https://example.com/image1.jpg",
-      "speaker": "Brené Brown",
-      "duration": 20,
-      "description": "A talk about the power of vulnerability and connection."
-    },
-    {
-      "id": 2,
-      "name": "Do Schools Kill Creativity?",
-      "image": "https://example.com/image2.jpg",
-      "speaker": "Sir Ken Robinson",
-      "duration": 18,
-      "description": "A talk on the importance of creativity in education."
-    }
-  ]
+  "tedTalks": []
 }
