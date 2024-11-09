@@ -12,7 +12,7 @@ class TedSearchBar extends StatelessWidget {
       child: TextField(
         onChanged: updateFilter,
         decoration: InputDecoration(
-          hintText: 'Search TED Talks...',
+          hintText: 'Procure sua lista...',
           prefixIcon: const Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),

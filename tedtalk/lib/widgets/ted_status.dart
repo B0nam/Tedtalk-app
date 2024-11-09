@@ -19,12 +19,12 @@ class _TedStatusState extends State<TedStatus> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Hours Watched: $hoursWatched',
+            'Horas Assistidas: $hoursWatched',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'TED Talks Watched: $tedTalksWatched',
+            'TED Talks assistidos: $tedTalksWatched',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],

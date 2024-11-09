@@ -18,7 +18,6 @@ class _HomeState extends State<Home> {
     });
   }
 
-  // Função para exibir a tela de criação de nova lista
   void _criarNovaLista() async {
     final novoTitulo = await showDialog<String>(
       context: context,
@@ -43,14 +42,11 @@ class _HomeState extends State<Home> {
     );
 
     if (novoTitulo != null && novoTitulo.isNotEmpty) {
-      // Gerar um ID para a nova lista (usando o número de listas existentes como ID)
-      final novoId = DateTime.now()
-          .millisecondsSinceEpoch; // ou algum outro método para gerar IDs
+      final novoId = DateTime.now().millisecondsSinceEpoch;
 
-      // Criar uma nova lista com ID gerado e sem TED Talks inicialmente
-      final novaLista = TedList(id: novoId, title: novoTitulo, tedTalks: []);
+      final novaLista =
+          TedList(id: novoId.toString(), title: novoTitulo, tedTalks: []);
 
-      // Salvar no serviço de listas
       await _tedListService.createTedList(novaLista);
       setState(() {});
     }
@@ -74,7 +70,6 @@ class _HomeState extends State<Home> {
         children: [
           const ResumoAssistido(),
           BarraDePesquisa(atualizarFiltro: atualizarFiltro),
-          // Botão para criar uma nova lista
           Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -108,17 +103,13 @@ class _HomeState extends State<Home> {
                             horizontal: 16.0, vertical: 8.0),
                         child: ListTile(
                           title: Text(lista.title),
-                          subtitle: Text(
-                              'Contains ${lista.tedTalks.length} TED Talks'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
-                            // Navega para a tela de TED Talks dessa lista
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => TedListPage(
-                                    tedList:
-                                        lista), // Passando a lista para a nova página
+                                builder: (context) =>
+                                    TedListPage(tedList: lista),
                               ),
                             );
                           },

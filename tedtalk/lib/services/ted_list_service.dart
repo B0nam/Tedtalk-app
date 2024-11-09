@@ -15,7 +15,7 @@ class TedListService {
     }
   }
 
-  Future<TedList> fetchTedListById(int id) async {
+  Future<TedList> fetchTedListById(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/$id'));
     if (response.statusCode == 200) {
       return TedList.fromJson(jsonDecode(response.body));
@@ -34,27 +34,6 @@ class TedListService {
       return TedList.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to create TED List');
-    }
-  }
-
-  // Método atualizado para aceitar o objeto completo de TedList
-  Future<TedList> updateTedList(TedList tedList) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/${tedList.id}'), // Usando o ID da lista diretamente
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(tedList.toJson()),
-    );
-    if (response.statusCode == 200) {
-      return TedList.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to update TED List');
-    }
-  }
-
-  Future<void> deleteTedList(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/$id'));
-    if (response.statusCode != 200) {
-      throw Exception('Failed to delete TED List');
     }
   }
 }

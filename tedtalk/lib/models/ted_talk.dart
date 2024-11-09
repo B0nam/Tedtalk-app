@@ -1,5 +1,5 @@
 class TedTalk {
-  final int id;
+  final String id;
   final String name;
   final String image;
   final String speaker;
@@ -17,7 +17,7 @@ class TedTalk {
 
   factory TedTalk.fromJson(Map<String, dynamic> json) {
     return TedTalk(
-      id: int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'].toString(),
       name: json['name'] as String,
       image: json['image'] as String,
       speaker: json['speaker'] as String,

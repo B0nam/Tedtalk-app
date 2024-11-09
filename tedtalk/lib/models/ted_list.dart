@@ -1,7 +1,7 @@
 class TedList {
-  final int id;
+  final String id;
   final String title;
-  final List<int> tedTalks;
+  final List<String> tedTalks;
 
   TedList({
     required this.id,
@@ -11,11 +11,9 @@ class TedList {
 
   factory TedList.fromJson(Map<String, dynamic> json) {
     return TedList(
-      id: int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'].toString(),
       title: json['title'] as String,
-      tedTalks: (json['tedTalks'] as List)
-          .map((e) => int.tryParse(e.toString()) ?? 0)
-          .toList(),
+      tedTalks: List<String>.from(json['tedTalks'].map((e) => e.toString())),
     );
   }
 

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tedtalk/models/ted_list.dart';
-import 'package:tedtalk/models/ted_talk.dart'; // Importando o TedTalk
-import 'package:tedtalk/services/ted_list_service.dart';
-import 'package:tedtalk/services/ted_talk_service.dart'; // Servico para pegar dados completos do TED Talk
+import 'package:tedtalk/models/ted_talk.dart';
+import 'package:tedtalk/services/ted_talk_service.dart';
 
 class TedListPage extends StatefulWidget {
   final TedList tedList;
@@ -14,27 +13,60 @@ class TedListPage extends StatefulWidget {
 }
 
 class _TedListPageState extends State<TedListPage> {
-  final TedListService _tedListService = TedListService();
-  final TedTalkService _tedTalkService =
-      TedTalkService(); // Serviço para pegar o TED Talk completo
+  final TedTalkService _tedTalkService = TedTalkService();
 
-  // Função para adicionar um TED Talk à lista
   void _adicionarTedTalk() async {
-    final novoTedTalkId = await showDialog<int>(
+    final novoTedTalk = await showDialog<TedTalk>(
       context: context,
       builder: (context) {
-        TextEditingController controller = TextEditingController();
+        TextEditingController nameController = TextEditingController();
+        TextEditingController speakerController = TextEditingController();
+        TextEditingController descriptionController = TextEditingController();
+        TextEditingController durationController = TextEditingController();
+        TextEditingController imageController = TextEditingController();
+
         return AlertDialog(
           title: const Text('Adicionar TED Talk'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(hintText: 'ID do TED Talk'),
-            keyboardType: TextInputType.number,
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                  controller: nameController,
+                  decoration:
+                      const InputDecoration(hintText: 'Nome do TED Talk')),
+              TextField(
+                  controller: speakerController,
+                  decoration: const InputDecoration(hintText: 'Palestrante')),
+              TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(hintText: 'Descrição')),
+              TextField(
+                  controller: durationController,
+                  decoration:
+                      const InputDecoration(hintText: 'Duração (em minutos)'),
+                  keyboardType: TextInputType.number),
+              TextField(
+                  controller: imageController,
+                  decoration: const InputDecoration(hintText: 'URL da Imagem')),
+            ],
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(int.tryParse(controller.text) ?? 0);
+                final newId = DateTime.now().millisecondsSinceEpoch.toString();
+
+                final newTedTalk = TedTalk(
+                  id: newId,
+                  name: nameController.text,
+                  speaker: speakerController.text,
+                  description: descriptionController.text,
+                  duration: Duration(
+                      minutes: int.tryParse(durationController.text) ?? 0),
+                  image: imageController.text,
+                );
+
+                Navigator.of(context).pop(newTedTalk);
               },
               child: const Text('Adicionar'),
             ),
@@ -43,21 +75,18 @@ class _TedListPageState extends State<TedListPage> {
       },
     );
 
-    if (novoTedTalkId != null && novoTedTalkId > 0) {
+    if (novoTedTalk != null) {
       setState(() {
-        widget.tedList.tedTalks
-            .add(novoTedTalkId); // Adiciona o ID na lista de IDs
+        widget.tedList.tedTalks.add(novoTedTalk.id);
       });
 
-      // Atualiza a lista de TED Talks no serviço
-      await _tedListService.updateTedList(widget.tedList);
+      await _tedTalkService.createTedTalk(novoTedTalk);
     }
   }
 
-  // Função para buscar o TED Talk completo baseado no ID
-  Future<TedTalk> _buscarTedTalk(int id) async {
-    return await _tedTalkService
-        .fetchTedTalkById(id); // Busca os detalhes do TED Talk com o ID
+  Future<TedTalk> _buscarTedTalkCompleto(String id) async {
+    final tedTalk = await _tedTalkService.fetchTedTalkById(id);
+    return tedTalk;
   }
 
   @override
@@ -65,11 +94,9 @@ class _TedListPageState extends State<TedListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.tedList.title),
-        backgroundColor: const Color.fromARGB(255, 224, 224, 224),
       ),
       body: Column(
         children: [
-          // Exibe a quantidade de TED Talks na lista
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -77,12 +104,10 @@ class _TedListPageState extends State<TedListPage> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          // Lista os TED Talks
           Expanded(
             child: FutureBuilder<List<TedTalk>>(
-              future: Future.wait(
-                widget.tedList.tedTalks.map((id) => _buscarTedTalk(id)),
-              ),
+              future: Future.wait(widget.tedList.tedTalks
+                  .map((id) => _buscarTedTalkCompleto(id))),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -102,14 +127,14 @@ class _TedListPageState extends State<TedListPage> {
                             vertical: 8.0, horizontal: 16.0),
                         child: ListTile(
                           leading: Image.network(
-                              "https://store-images.s-microsoft.com/image/apps.698.9007199266296203.3ee303e5-000c-4c1d-9e50-cb965308ca7f.17039190-26bd-4450-b4c2-d918551d8bf0?h=210",
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover),
+                            "https://store-images.s-microsoft.com/image/apps.698.9007199266296203.3ee303e5-000c-4c1d-9e50-cb965308ca7f.17039190-26bd-4450-b4c2-d918551d8bf0?h=210",
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
                           title: Text(tedTalk.name),
-                          subtitle: Text(
-                              'Duração: ${tedTalk.duration.inMinutes} min\nPor: ${tedTalk.speaker}'),
-                          isThreeLine: true,
+                          subtitle: Text('Palestrante: ${tedTalk.speaker}'),
+                          trailing: Text('${tedTalk.duration.inMinutes} min'),
                         ),
                       );
                     },
@@ -118,7 +143,6 @@ class _TedListPageState extends State<TedListPage> {
               },
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
