@@ -17,11 +17,12 @@ class TedTalk {
 
   factory TedTalk.fromJson(Map<String, dynamic> json) {
     return TedTalk(
-      id: json['id'] as int,
+      id: int.tryParse(json['id'].toString()) ?? 0,
       name: json['name'] as String,
       image: json['image'] as String,
       speaker: json['speaker'] as String,
-      duration: Duration(minutes: json['duration'] as int),
+      duration:
+          Duration(minutes: int.tryParse(json['duration'].toString()) ?? 0),
       description: json['description'] as String,
     );
   }

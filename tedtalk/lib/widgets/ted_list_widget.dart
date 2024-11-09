@@ -79,7 +79,7 @@ class TedTalksListScreen extends StatelessWidget {
         itemCount: tedList.tedTalks.length,
         itemBuilder: (context, index) {
           final tedTalkId = tedList.tedTalks[index];
-          // Você pode usar o serviço de TedTalkService para pegar os detalhes do TED Talk
+
           return FutureBuilder<TedTalk>(
             future: TedTalkService().fetchTedTalkById(tedTalkId),
             builder: (context, snapshot) {

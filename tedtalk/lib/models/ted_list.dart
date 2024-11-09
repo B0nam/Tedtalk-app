@@ -11,10 +11,10 @@ class TedList {
 
   factory TedList.fromJson(Map<String, dynamic> json) {
     return TedList(
-      id: json['id'] as int,
+      id: int.tryParse(json['id'].toString()) ?? 0,
       title: json['title'] as String,
       tedTalks: (json['tedTalks'] as List)
-          .map((e) => int.parse(e.toString()))
+          .map((e) => int.tryParse(e.toString()) ?? 0)
           .toList(),
     );
   }
