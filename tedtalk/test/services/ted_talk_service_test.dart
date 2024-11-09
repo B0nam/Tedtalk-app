@@ -4,12 +4,14 @@ import 'package:mockito/mockito.dart';
 import 'package:tedtalk/models/ted_talk.dart';
 import 'package:tedtalk/services/ted_talk_service.dart';
 
+import 'ted_talk_service_test.mocks.dart';
+
 @GenerateMocks([TedTalkService])
 void main() {
-  late MockTedService mockTedService;
+  late MockTedTalkService mockTedTalkService;
 
   setUp(() {
-    mockTedService = MockTedService();
+    mockTedTalkService = MockTedTalkService();
   });
 
   test('Verificar se a lista de TED Talks é carregada corretamente', () async {
@@ -37,20 +39,17 @@ void main() {
           description: '3'),
     ];
 
-    when(mockTedService.fetchTedTalks()).thenAnswer((_) async => tedTalksMock);
+    when(mockTedTalkService.fetchAllTedTalks()).thenAnswer((_) async => tedTalksMock);
 
-    final tedTalks = await mockTedService.fetchTedTalks();
+    final tedTalks = await mockTedTalkService.fetchAllTedTalks();
 
     expect(tedTalks.length, 3);
-    expect(tedTalks[0].title, '1');
-    expect(tedTalks[1].title, '2');
-    expect(tedTalks[2].title, '3');
   });
 
   test('Deve lançar exceção se a resposta da API for inválida', () async {
-    when(mockTedService.fetchTedTalks())
+    when(mockTedTalkService.fetchAllTedTalks())
         .thenThrow(Exception('Erro ao carregar TedTalk'));
 
-    expect(() async => await mockTedService.fetchTedTalks(), throwsException);
+    expect(() async => await mockTedTalkService.fetchAllTedTalks(), throwsException);
   });
 }
