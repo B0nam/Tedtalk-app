@@ -59,11 +59,9 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _removerLista(TedList lista) async {
-    // Apagar todos os TED Talks dessa lista antes de excluir a lista
     for (var tedTalk in lista.tedTalks) {
       await _tedTalkService.deleteTedTalk(tedTalk);
     }
-    // Agora remove a lista em si
     await _tedListService.deleteTedList(lista.id);
     _reload();
   }
@@ -84,7 +82,16 @@ class _HomeState extends State<Home> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ResumoAssistido(),
+          const Center(
+            child: Text(
+              'TEDTalks',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           BarraDePesquisa(atualizarFiltro: atualizarFiltro),
           Padding(
             padding:
@@ -175,7 +182,7 @@ class _HomeState extends State<Home> {
                                     TedListPage(tedList: lista),
                               ),
                             ).then((_) {
-                              _reload(); // Force reload after returning from the TedListPage
+                              _reload();
                             });
                           },
                         ),
@@ -221,39 +228,6 @@ class _HomeState extends State<Home> {
       await _tedListService.updateTedList(listaAtualizada);
       _reload();
     }
-  }
-}
-
-class ResumoAssistido extends StatefulWidget {
-  const ResumoAssistido({Key? key}) : super(key: key);
-
-  @override
-  _ResumoAssistidoState createState() => _ResumoAssistidoState();
-}
-
-class _ResumoAssistidoState extends State<ResumoAssistido> {
-  int horasAssistidas = 10;
-  int tedTalksAssistidos = 5;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Horas assistidas: $horasAssistidas',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'TED Talks assistidos: $tedTalksAssistidos',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
   }
 }
 
