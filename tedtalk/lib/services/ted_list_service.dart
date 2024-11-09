@@ -37,9 +37,10 @@ class TedListService {
     }
   }
 
-  Future<TedList> updateTedList(int id, TedList tedList) async {
+  // Método atualizado para aceitar o objeto completo de TedList
+  Future<TedList> updateTedList(TedList tedList) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/$id'),
+      Uri.parse('$baseUrl/${tedList.id}'), // Usando o ID da lista diretamente
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(tedList.toJson()),
     );

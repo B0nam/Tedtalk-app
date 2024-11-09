@@ -1,8 +1,7 @@
-// lib/pages/home.dart
 import 'package:flutter/material.dart';
 import 'package:tedtalk/models/ted_list.dart';
 import 'package:tedtalk/services/ted_list_service.dart';
-import 'package:tedtalk/widgets/ted_list_widget.dart';
+import 'ted_list_page.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -17,6 +16,44 @@ class _HomeState extends State<Home> {
     setState(() {
       filtroDeBusca = novoFiltro;
     });
+  }
+
+  // Função para exibir a tela de criação de nova lista
+  void _criarNovaLista() async {
+    final novoTitulo = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        TextEditingController controller = TextEditingController();
+        return AlertDialog(
+          title: const Text('Criar nova Lista de TED Talks'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(hintText: 'Título da lista'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(controller.text);
+              },
+              child: const Text('Criar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (novoTitulo != null && novoTitulo.isNotEmpty) {
+      // Gerar um ID para a nova lista (usando o número de listas existentes como ID)
+      final novoId = DateTime.now()
+          .millisecondsSinceEpoch; // ou algum outro método para gerar IDs
+
+      // Criar uma nova lista com ID gerado e sem TED Talks inicialmente
+      final novaLista = TedList(id: novoId, title: novoTitulo, tedTalks: []);
+
+      // Salvar no serviço de listas
+      await _tedListService.createTedList(novaLista);
+      setState(() {});
+    }
   }
 
   @override
@@ -37,27 +74,30 @@ class _HomeState extends State<Home> {
         children: [
           const ResumoAssistido(),
           BarraDePesquisa(atualizarFiltro: atualizarFiltro),
+          // Botão para criar uma nova lista
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: ElevatedButton(
+              onPressed: _criarNovaLista,
+              child: const Text('Criar Nova Lista'),
+            ),
+          ),
           Expanded(
             child: FutureBuilder<List<TedList>>(
-              future: _tedListService
-                  .fetchAllTedLists(), // Carregar todas as listas de TED Talks
+              future: _tedListService.fetchAllTedLists(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                      child: CircularProgressIndicator()); // Carregando
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(
-                      child: Text(
-                          'Error: ${snapshot.error}')); // Exibe erro se houver
+                  return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                      child: Text(
-                          'No TED Lists available')); // Caso não haja dados
+                  return const Center(child: Text('No TED Lists available'));
                 } else {
                   final listas = snapshot.data!
-                      .where((lista) => lista.title.toLowerCase().contains(
-                          filtroDeBusca
-                              .toLowerCase())) // Aplica o filtro de busca
+                      .where((lista) => lista.title
+                          .toLowerCase()
+                          .contains(filtroDeBusca.toLowerCase()))
                       .toList();
                   return ListView.builder(
                     itemCount: listas.length,
@@ -76,8 +116,9 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    TedTalksListScreen(tedList: lista),
+                                builder: (context) => TedListPage(
+                                    tedList:
+                                        lista), // Passando a lista para a nova página
                               ),
                             );
                           },
