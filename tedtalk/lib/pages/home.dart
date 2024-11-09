@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tedtalk/models/ted_list.dart';
 import 'package:tedtalk/services/ted_list_service.dart';
+import 'package:tedtalk/services/ted_talk_service.dart';
 import 'ted_list_page.dart';
 
 class Home extends StatefulWidget {
@@ -10,12 +11,17 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final TedListService _tedListService = TedListService();
+  final TedTalkService _tedTalkService = TedTalkService();
   String filtroDeBusca = '';
 
   void atualizarFiltro(String novoFiltro) {
     setState(() {
       filtroDeBusca = novoFiltro;
     });
+  }
+
+  Future<void> _reload() async {
+    setState(() {});
   }
 
   void _criarNovaLista() async {
@@ -48,8 +54,18 @@ class _HomeState extends State<Home> {
           TedList(id: novoId.toString(), title: novoTitulo, tedTalks: []);
 
       await _tedListService.createTedList(novaLista);
-      setState(() {});
+      _reload();
     }
+  }
+
+  Future<void> _removerLista(TedList lista) async {
+    // Apagar todos os TED Talks dessa lista antes de excluir a lista
+    for (var tedTalk in lista.tedTalks) {
+      await _tedTalkService.deleteTedTalk(tedTalk);
+    }
+    // Agora remove a lista em si
+    await _tedListService.deleteTedList(lista.id);
+    _reload();
   }
 
   @override
@@ -87,7 +103,7 @@ class _HomeState extends State<Home> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No TED Lists available'));
+                  return const Center(child: Text('Nenhuma lista encontrada'));
                 } else {
                   final listas = snapshot.data!
                       .where((lista) => lista.title
@@ -103,7 +119,54 @@ class _HomeState extends State<Home> {
                             horizontal: 16.0, vertical: 8.0),
                         child: ListTile(
                           title: Text(lista.title),
-                          trailing: const Icon(Icons.chevron_right),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () {
+                                  _editarLista(lista);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () async {
+                                  bool confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text(
+                                                'Confirmar Exclusão'),
+                                            content: const Text(
+                                                'Tem certeza que deseja excluir esta lista?'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(false);
+                                                },
+                                                child: const Text('Cancelar'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(true);
+                                                },
+                                                child: const Text('Excluir'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ) ??
+                                      false;
+
+                                  if (confirm) {
+                                    await _removerLista(lista);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -111,7 +174,9 @@ class _HomeState extends State<Home> {
                                 builder: (context) =>
                                     TedListPage(tedList: lista),
                               ),
-                            );
+                            ).then((_) {
+                              _reload(); // Force reload after returning from the TedListPage
+                            });
                           },
                         ),
                       );
@@ -124,6 +189,38 @@ class _HomeState extends State<Home> {
         ],
       ),
     );
+  }
+
+  Future<void> _editarLista(TedList lista) async {
+    final novoTitulo = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        TextEditingController controller =
+            TextEditingController(text: lista.title);
+        return AlertDialog(
+          title: const Text('Editar Lista de TED Talks'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(hintText: 'Novo título da lista'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(controller.text);
+              },
+              child: const Text('Salvar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (novoTitulo != null && novoTitulo.isNotEmpty) {
+      final listaAtualizada =
+          TedList(id: lista.id, title: novoTitulo, tedTalks: lista.tedTalks);
+      await _tedListService.updateTedList(listaAtualizada);
+      _reload();
+    }
   }
 }
 
@@ -173,7 +270,7 @@ class BarraDePesquisa extends StatelessWidget {
       child: TextField(
         onChanged: atualizarFiltro,
         decoration: InputDecoration(
-          hintText: 'Search TED Lists...',
+          hintText: 'Buscar lista...',
           prefixIcon: const Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),

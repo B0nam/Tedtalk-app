@@ -36,4 +36,24 @@ class TedTalkService {
       throw Exception('Failed to create TED Talk');
     }
   }
+
+  Future<void> updateTedTalk(TedTalk tedTalk) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/${tedTalk.id}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(tedTalk.toJson()),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update TED Talk');
+    }
+  }
+
+  Future<void> deleteTedTalk(String id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/$id'));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete TED Talk');
+    }
+  }
 }

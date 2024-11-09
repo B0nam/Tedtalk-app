@@ -36,4 +36,26 @@ class TedListService {
       throw Exception('Failed to create TED List');
     }
   }
+
+  Future<void> updateTedList(TedList tedList) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/${tedList.id}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(tedList.toJson()),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update TED List');
+    }
+  }
+
+  Future<void> deleteTedList(String id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/$id'),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete TED List');
+    }
+  }
 }
